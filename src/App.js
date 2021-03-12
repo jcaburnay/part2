@@ -1,39 +1,46 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
 const Persons = ({ persons }) => {
   return (
     <ul>
-      {persons.map(person => <li key={person.name}>{person.name}</li>)}
+      {persons.map((person) => (
+        <li key={person.name}>{person.name}</li>
+      ))}
     </ul>
-  )
-} 
+  );
+};
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-  ]) 
-  const [ newName, setNewName ] = useState('')
+  const [persons, setPersons] = useState([
+    { name: "Arto Hellas", number: "040-123456" },
+    { name: "Ada Lovelace", number: "39-44-5323523" },
+  ]);
+  const [newName, setNewName] = useState("");
 
-  const submit = event => {
+  const submit = (event) => {
     event.preventDefault();
-    const nameObject = {
-      name: newName,
+    if (persons.map((person) => person.name).includes(newName)) {
+      alert(`${newName} is already in the phonebook`);
+    } else {
+      const nameObject = {
+        name: newName,
+      };
+      setPersons(persons.concat(nameObject));
+      setNewName("");
     }
-    setPersons(persons.concat(nameObject));
-    setNewName('');
-  }
+  };
 
-  const handleNameChange = event => {
+  const handleNameChange = (event) => {
     setNewName(event.target.value);
-  }
+  };
 
   return (
     <div>
       <h2>Phonebook</h2>
       <form onSubmit={submit}>
         <div>
-          name: <input type="text" value={newName} onChange={handleNameChange}/>
+          name:{" "}
+          <input type="text" value={newName} onChange={handleNameChange} />
         </div>
         <div>
           <button type="submit">add</button>
@@ -42,7 +49,7 @@ const App = () => {
       <h2>Numbers</h2>
       <Persons persons={persons} />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
