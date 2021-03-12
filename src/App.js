@@ -1,5 +1,50 @@
 import React, { useState } from "react";
 
+const Filter = ({ searchName, onSearch }) => {
+  return (
+    <div>
+      <span>
+        search contact:{" "}
+        <input type="text" value={searchName} onChange={onSearch} />
+      </span>
+    </div>
+  );
+};
+
+const PersonForm = ({
+  submit,
+  newName,
+  handleNameChange,
+  newNumber,
+  handleNumberChange,
+}) => {
+  return (
+    <form onSubmit={submit}>
+      <div>
+        name:{" "}
+        <input
+          type="text"
+          value={newName}
+          onChange={handleNameChange}
+          required
+        />
+      </div>
+      <div>
+        number:{" "}
+        <input
+          type="text"
+          value={newNumber}
+          onChange={handleNumberChange}
+          required
+        />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  );
+};
+
 const Persons = ({ persons }) => {
   return (
     <ul>
@@ -49,45 +94,24 @@ const App = () => {
     setSearchName(event.target.value);
   };
 
-  const searchNames = persons.filter((person) =>
-    person.name.toLowerCase().includes(searchName)
+  const searchedNames = persons.filter((person) =>
+    person.name.toLowerCase().includes(searchName.toLowerCase())
   );
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>
-        <span>
-          search contact:{" "}
-          <input type="text" value={searchName} onChange={onSearch} />
-        </span>
-      </div>
-      <h2>Add new contact</h2>
-      <form onSubmit={submit}>
-        <div>
-          name:{" "}
-          <input
-            type="text"
-            value={newName}
-            onChange={handleNameChange}
-            required
-          />
-        </div>
-        <div>
-          number:{" "}
-          <input
-            type="text"
-            value={newNumber}
-            onChange={handleNumberChange}
-            required
-          />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      <Persons persons={searchNames} />
+      <Filter searchName={searchName} onSearch={onSearch} />
+      <h3>Add a new contact</h3>
+      <PersonForm
+        submit={submit}
+        newName={newName}
+        handleNameChange={handleNameChange}
+        newNumber={newNumber}
+        handleNumberChange={handleNumberChange}
+      />
+      <h3>Numbers</h3>
+      <Persons persons={searchedNames} />
     </div>
   );
 };
