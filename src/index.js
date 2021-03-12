@@ -6,6 +6,7 @@ const Header = ({ course }) => {
 };
 
 const Total = ({ course }) => {
+  // Total number of exercises already calculated using reduce function
   const sum = course.parts
     .map((part) => part.exercises)
     .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
