@@ -1,111 +1,122 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const Countries = ({ countries }) => {
-  const [show, setShow] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState("")
-  const toggleShow = (countryName) => {
-    setShow(!show);
-    setSelectedCountry(countries.filter(country => country.name === countryName)[0])
-  }
-  if(countries.length > 10) {
-    return (
-      <p>Too many matches, specify another filter</p>
-    )
-  } else if(countries.length === 1) {
-    return (
-      <CountryInfo country={countries[0]} />
-    )
-  }
-  return (
-    show ? <CountryInfo country={selectedCountry} onShow={toggleShow} /> : <ListCountries countries={countries} onShow={toggleShow}/>
-  )
-}
-
-const CountryInfo = ({ country, onShow }) => {
-  return (
-    <React.Fragment key={country.name}>
-      <h2>{country.name}</h2>
-      <p>capital: {country.capital}</p>
-      <p>population: {country.population}</p>
-      <h4>languages: </h4>
-      <ul>
-        {country.languages.map(language => <li key={language.name}>{language.name}</li>)}
-      </ul>
-      <img src={country.flag} alt={`${country.name} flag`} style={{height: '200px', display: 'block'}}/>
-      <button onClick={onShow}>hide</button>
-      <Weather countryCapital={country.capital} />
-    </React.Fragment>
-  )
-}
-
-const Weather = ({ countryCapital }) => {
-  const [weatherInfo, setWeatherInfo] = useState({})
- 
-  useEffect(() => {
-    const accessKey = process.env.REACT_APP_API_KEY;
-    const params = {
-      access_key: accessKey,
-      query: countryCapital
-    };
-    axios
-    .get('http://api.weatherstack.com/current', { params })
-      .then(response => {
-        setWeatherInfo({
-          capitalTemperature: response.data.current.temperature,
-          icon: response.data.current.weather_icons[0],
-          windSpeed: response.data.current.wind_speed,
-          windDir: response.data.current.wind_dir
-        })
-      })
-      .catch(error => console.log(error))
-  }, [countryCapital])
-  
-  return (
-    <>
-      <h4>Weather in {countryCapital}</h4>
-      <h6>temperature:</h6>
-      <p>{weatherInfo.capitalTemperature}</p>
-      <img src={weatherInfo.icon} alt="weather icon" style={{height: '100px', display: 'block'}}/>
-      <p>{weatherInfo.windSpeed} mph from {weatherInfo.windDir}</p>
-    </>
-  )
-}
-
-const ListCountries = ({ countries, onShow }) => {
-
-  return (
-    <ul>
-      {countries.map(country => <li key={country.name}>{country.name}<button onClick={() => onShow(country.name)}>show</button></li>)}
-    </ul>
-  )
-}
-
-const App = () => {
-  const [countries, setCountries] = useState([]);
-  const [searchCountry, setSearchCountry] = useState("");
-
-  useEffect(() => {
-    if(searchCountry === "") {
-      setCountries([]);
-    } else {
-      axios.get("https://restcountries.eu/rest/v2/all").then((response) => {
-        setCountries(response.data);
-      });
-    }
-  }, [searchCountry]);
-
-  const onSearch = (event) => {
-    setSearchCountry(event.target.value);
-  };
-
-  const searchedCountries = countries.filter((country) =>
-    country.name.toLowerCase().includes(searchCountry.toLowerCase())
-  );
+const Filter = ({ searchName, onSearch }) => {
   return (
     <div>
-      <p>find countries: <input type="text" value={searchCountry} onChange={onSearch}/></p>
-      <Countries countries={searchedCountries} />
+      <span>
+        search contact:{" "}
+        <input type="text" value={searchName} onChange={onSearch} />
+      </span>
+    </div>
+  );
+};
+
+const PersonForm = ({
+  submit,
+  newName,
+  handleNameChange,
+  newNumber,
+  handleNumberChange,
+}) => {
+  return (
+    <form onSubmit={submit}>
+      <div>
+        name:{" "}
+        <input
+          type="text"
+          value={newName}
+          onChange={handleNameChange}
+          required
+        />
+      </div>
+      <div>
+        number:{" "}
+        <input
+          type="text"
+          value={newNumber}
+          onChange={handleNumberChange}
+          required
+        />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  );
+};
+
+const Persons = ({ persons }) => {
+  return (
+    <ul>
+      {persons.map((person) => (
+        <li key={person.name}>
+          {person.name} {person.number}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const App = () => {
+  const [persons, setPersons] = useState([]);
+  const [newName, setNewName] = useState("");
+  const [newNumber, setNewNumber] = useState("");
+  const [searchName, setSearchName] = useState("");
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((response) => {
+      setPersons(response.data);
+    });
+  }, []);
+
+  const submit = (event) => {
+    event.preventDefault();
+    if (persons.map((person) => person.name).includes(newName)) {
+      alert(`${newName} is already in the phonebook`);
+    } else {
+      const personObject = {
+        name: newName,
+        number: newNumber,
+      };
+      axios.post("http://localhost:3001/persons", personObject)
+        .then(response => {
+          setPersons(persons.concat(response.data));
+          setNewName("");
+          setNewNumber("");
+        })
+    }
+  };
+
+  const handleNameChange = (event) => {
+    setNewName(event.target.value);
+  };
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value);
+  };
+
+  const onSearch = (event) => {
+    setSearchName(event.target.value);
+  };
+
+  const searchedNames = persons.filter((person) =>
+    person.name.toLowerCase().includes(searchName.toLowerCase())
+  );
+
+  return (
+    <div>
+      <h2>Phonebook</h2>
+      <Filter searchName={searchName} onSearch={onSearch} />
+      <h3>Add a new contact</h3>
+      <PersonForm
+        submit={submit}
+        newName={newName}
+        handleNameChange={handleNameChange}
+        newNumber={newNumber}
+        handleNumberChange={handleNumberChange}
+      />
+      <h3>Numbers</h3>
+      <Persons persons={searchedNames} />
     </div>
   );
 };
