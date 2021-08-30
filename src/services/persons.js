@@ -13,10 +13,16 @@ const addPerson = async (newPerson) => {
     return response.data;
 }
 
+const updateNumber = async (id, updatedPerson) => {
+    const request =  axios.put(`${baseUrl}/${id}`, updatedPerson);
+    const response = await request;
+    return response.data;
+}
+
 const deletePerson = async (id) => {
     await axios.delete(`${baseUrl}/${id}`)
 }
 
-const methods = { getAll, addPerson, deletePerson }
+const methods = { getAll, addPerson, updateNumber, deletePerson }
 
 export default methods

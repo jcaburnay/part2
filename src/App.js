@@ -75,7 +75,21 @@ const App = () => {
   const submit = (event) => {
     event.preventDefault();
     if (persons.map((person) => person.name).includes(newName)) {
-      alert(`${newName} is already in the phonebook`);
+      const personToUpdate = persons.find(person => person.name === newName);
+      const updatedPerson = {
+        ...personToUpdate,
+        number: newNumber
+      };
+      const confirm = window.confirm(`${newName} is already in the phonebook, update number instead?`);
+      if(confirm) {
+        personService
+          .updateNumber(personToUpdate.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== personToUpdate.id ? person : returnedPerson))
+          });
+        setNewName("");
+        setNewNumber("");
+      }
     } else {
       const personObject = {
         name: newName,
