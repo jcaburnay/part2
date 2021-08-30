@@ -58,12 +58,12 @@ const Persons = ({ persons, onDelete }) => {
   );
 };
 
-const Notification = ({ message }) => {
+const Notification = ({ notifType, message }) => {
   if(message === null) {
     return null
   }
   return (
-    <div className="success">
+    <div className={notifType}>
       {message}
     </div>
   )
@@ -74,7 +74,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchName, setSearchName] = useState("");
-  const [notifMessage, setNotifMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personService
@@ -98,10 +99,17 @@ const App = () => {
           .updateNumber(personToUpdate.id, updatedPerson)
           .then(returnedPerson => {
             setPersons(persons.map(person => person.id !== personToUpdate.id ? person : returnedPerson));
-            setNotifMessage(`${returnedPerson.name}'s number was updated`);
+            setSuccessMessage(`${returnedPerson.name}'s number was updated`);
             setTimeout(() => {
-              setNotifMessage(null)
+              setSuccessMessage(null)
             }, 5000)
+          })
+          .catch(error => {
+            setErrorMessage(`Information of ${personToUpdate.name} has already been removed from server`);
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 5000);
+            setPersons(persons.filter(person => person.id !== personToUpdate.id))
           });
         setNewName("");
         setNewNumber("");
@@ -114,12 +122,12 @@ const App = () => {
       personService
         .addPerson(personObject)
         .then(returnedPerson => {
-          setNotifMessage(`Added ${returnedPerson.name}`)
+          setSuccessMessage(`Added ${returnedPerson.name}`)
           setPersons(persons.concat(returnedPerson));
           setNewName("");
           setNewNumber("");
           setTimeout(() => {
-            setNotifMessage(null)
+            setSuccessMessage(null)
           }, 5000)
         })
     }
@@ -153,7 +161,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notifMessage} />
+      <Notification message={successMessage} notifType="success" />
+      <Notification message={errorMessage} notifType="error" />
       <Filter searchName={searchName} onSearch={onSearch} />
       <h3>Add a new contact</h3>
       <PersonForm
