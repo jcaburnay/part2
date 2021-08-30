@@ -58,11 +58,23 @@ const Persons = ({ persons, onDelete }) => {
   );
 };
 
+const Notification = ({ message }) => {
+  if(message === null) {
+    return null
+  }
+  return (
+    <div className="success">
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchName, setSearchName] = useState("");
+  const [notifMessage, setNotifMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -85,7 +97,11 @@ const App = () => {
         personService
           .updateNumber(personToUpdate.id, updatedPerson)
           .then(returnedPerson => {
-            setPersons(persons.map(person => person.id !== personToUpdate.id ? person : returnedPerson))
+            setPersons(persons.map(person => person.id !== personToUpdate.id ? person : returnedPerson));
+            setNotifMessage(`${returnedPerson.name}'s number was updated`);
+            setTimeout(() => {
+              setNotifMessage(null)
+            }, 5000)
           });
         setNewName("");
         setNewNumber("");
@@ -98,9 +114,13 @@ const App = () => {
       personService
         .addPerson(personObject)
         .then(returnedPerson => {
+          setNotifMessage(`Added ${returnedPerson.name}`)
           setPersons(persons.concat(returnedPerson));
           setNewName("");
           setNewNumber("");
+          setTimeout(() => {
+            setNotifMessage(null)
+          }, 5000)
         })
     }
   };
@@ -133,6 +153,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notifMessage} />
       <Filter searchName={searchName} onSearch={onSearch} />
       <h3>Add a new contact</h3>
       <PersonForm
