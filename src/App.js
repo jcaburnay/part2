@@ -46,12 +46,12 @@ const PersonForm = ({
   );
 };
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, onDelete }) => {
   return (
     <ul>
       {persons.map((person) => (
         <li key={person.name}>
-          {person.name} {person.number}
+          {person.name} {person.number} <button onClick={() => onDelete(person.id)}>delete</button>
         </li>
       ))}
     </ul>
@@ -82,7 +82,7 @@ const App = () => {
         number: newNumber,
       };
       personService
-        .add(personObject)
+        .addPerson(personObject)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson));
           setNewName("");
@@ -90,7 +90,17 @@ const App = () => {
         })
     }
   };
-
+  const handleDelete = (id) => {
+    const personToDelete = persons.find(person => person.id === id);
+    const confirm = window.confirm(`Delete ${personToDelete.name}?`);
+    if(confirm) {
+      personService
+        .deletePerson(id);
+      personService
+        .getAll()
+        .then(persons => setPersons(persons));
+    }
+  }
   const handleNameChange = (event) => {
     setNewName(event.target.value);
   };
@@ -119,7 +129,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h3>Numbers</h3>
-      <Persons persons={searchedNames} />
+      <Persons persons={searchedNames} onDelete={handleDelete}/>
     </div>
   );
 };
