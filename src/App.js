@@ -34,7 +34,41 @@ const CountryInfo = ({ country, onShow }) => {
       </ul>
       <img src={country.flag} alt={`${country.name} flag`} style={{height: '200px', display: 'block'}}/>
       <button onClick={onShow}>hide</button>
+      <Weather countryCapital={country.capital} />
     </React.Fragment>
+  )
+}
+
+const Weather = ({ countryCapital }) => {
+  const [weatherInfo, setWeatherInfo] = useState({})
+ 
+  useEffect(() => {
+    const accessKey = process.env.REACT_APP_API_KEY;
+    const params = {
+      access_key: accessKey,
+      query: countryCapital
+    };
+    axios
+    .get('http://api.weatherstack.com/current', { params })
+      .then(response => {
+        setWeatherInfo({
+          capitalTemperature: response.data.current.temperature,
+          icon: response.data.current.weather_icons[0],
+          windSpeed: response.data.current.wind_speed,
+          windDir: response.data.current.wind_dir
+        })
+      })
+      .catch(error => console.log(error))
+  }, [countryCapital])
+  
+  return (
+    <>
+      <h4>Weather in {countryCapital}</h4>
+      <h6>temperature:</h6>
+      <p>{weatherInfo.capitalTemperature}</p>
+      <img src={weatherInfo.icon} alt="weather icon" style={{height: '100px', display: 'block'}}/>
+      <p>{weatherInfo.windSpeed} mph from {weatherInfo.windDir}</p>
+    </>
   )
 }
 
